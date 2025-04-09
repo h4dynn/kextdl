@@ -1,12 +1,26 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
 
-# Exit on errors
-set -e
+if [[ "$(uname -s)" == "Darwin" && -z "${ZSH_VERSION}" ]]
+then {
+  #
+  # Switch to zsh since macOS uses an outdated
+  # bash version that can't handle new bash syntax
+  #
+  zsh -e "${0}" ${@}
+  exit 0
+}
+fi
 
 function fatal()
 {
   echo -e "kextdl:" "\e[1;31merror (fatal):\e[0m" "$@"
   exit 1
+}
+
+function usage()
+{
+  echo "Usage: kextdl.command [Release/Debug] < kext.list" >&2
+  exit 0
 }
 
 function parseDlKext()
@@ -15,21 +29,31 @@ function parseDlKext()
   # kext list is formatted like:
   # Kext/Repo: KextName-{VERSION}-{VARIANT} (MainKext, KextModule1, KextModule2)
   #
-  kextRepo="${1%:}"
-  kextName="${kextRepo#*/}"
+  kextRepo="$(cut -d: -f1 <<< ${1})"
+  kextName="$(cut -d/ -f2 <<< ${kextRepo})"
   kextZipPattern="$2"
-  shift 2
 
-  if (( $# > 0 )) && [[ "${1::1}" == '(' && "${@}" == *')' ]]
+  if (( $# > 2 )) && [[ "${3}" == '('* && "${@}" == *')' ]]
   then {
-    kextFileDls="${@#(}" kextFileDls="${kextFileDls%)}"
-  	kextFileDls=(${kextFileDls//, / })
+    shift 2
+  	kextFileDls=($(cut -d'(' -f2- <<< ${@} | cut -d')' -f-1 | sed 's/, / /g'))
   }
   else {
     kextFileDls=("${kextName}")
   }
   fi
+
+  export kextRepo kextName kextZipPattern kextFileDls
 }
+
+case "${1}" in
+  "-h"|"--help")
+    usage
+    ;;
+  *)
+    variant="${1}"
+    ;;
+esac
 
 if [[ -f "./kext.list" ]]
 then {
@@ -45,21 +69,25 @@ else {
 }
 fi
 
-variant="$1"
-
 mkdir -p Kexts
 cd Kexts
+
+if [[ "$(head -n2 < ${config})" == *"# This is an example list, don't actually use it." ]]
+then {
+  fatal "You can't use the example list, edit it first"
+}
+fi
 
 while read dlKext
 do {
   # Skip comments
-  if [[ "${dlKext::1}" == '#' ]]
+  if [[ "${dlKext}" == '#'* || -z "${dlKext}" ]]
   then {
-  	continue
+    continue
   }
   fi
 
-  parseDlKext ${dlKext}
+  parseDlKext $(xargs <<< ${dlKext})
 
   #
   # Most kexts will be distributed with a
@@ -76,8 +104,7 @@ do {
   latestVersion="$(curl https://github.com/${kextRepo}/releases/latest -w '%{redirect_url}' -so /dev/null | cut -d'/' -f8)"
 
   # Replace version/variant placeholders
-  kextZipPattern="${kextZipPattern//'{VERSION}'/${latestVersion}}"
-  kextZipPattern="${kextZipPattern//'{VARIANT}'/${variant}}"
+  kextZipPattern="$(sed "s/{VERSION}/${latestVersion}/g; s/{VARIANT}/${variant}/g" <<< ${kextZipPattern})"
 
   echo "Downloading: ${kextRepo} ${latestVersion}" >&2
 

@@ -20,3 +20,6 @@ developer/repo kextName-{VERSION}-{VARIANT} (mainKext, kextModule1, kextModule2)
 ```
 acidanthera/VirtualSMC  VirtualSMC-{VERSION}-{VARIANT}  (VirtualSMC, SMCBatteryManager, SMCProcessor, SMCSuperIO)
 ```
+
+See [example_kext.list](https://github.com/h4dynn/kextdl/blob/main/example_kext.list)
+for an example of the list

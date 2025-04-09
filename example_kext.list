@@ -1,0 +1,102 @@
+#
+# This is an example list, don't actually use it.
+#
+# You should see Dortania's guide for which kexts
+# to use since this isn't extensive or sufficiently detailed:
+# https://dortania.github.io/OpenCore-Install-Guide/ktext.html
+#
+
+### ################## ###
+### Non-optional kexts ###
+### ################## ###
+
+#
+# Patching engine
+#
+acidanthera/Lilu        Lilu-{VERSION}-{VARIANT}
+
+#
+# SMC emulator
+#
+# Plugins & their uses:
+# SMCProcessor      -> Monitor CPU temperature (use SMCAMDProcessor for AMD systems)
+# SMCSuperIO        -> Monitor fan speed (not for AMD systems)
+# SMCLightSensor    -> Ambient light sensor on laptops
+# SMCBatteryManager -> Battery percentage reporting on laptops
+# SMCRadeonSensors  -> Monitor GPU temperature on AMD GPUs
+# SMCDellSensors    -> Dell System Management Mode (SMM) monitoring, mostly for Dell laptops
+#
+acidanthera/VirtualSMC     VirtualSMC-{VERSION}-{VARIANT} (VirtualSMC, [SMCProcessor or SMCAMDProcessor], SMCSuperIO, SMCBatteryManager, SMCLightSensor, SMCRadeonSensors, SMCDellSensors)
+
+#
+# Graphics patching
+#
+acidanthera/WhateverGreen  WhateverGreen-{VERSION}-{VARIANT}
+
+### ################# ###
+### Recommended kexts ###
+### ################# ###
+
+#
+# Audio codec
+# (specify either ALC or ALCU, see the README for more info)
+#
+acidanthera/AppleALC       AppleALC-{VERSION}-{VARIANT} (AppleALC)
+
+#
+# NVMe power management
+#
+acidanthera/NVMeFix        NVMeFix-{VERSION}-{VARIANT}
+
+### ##################### ###
+### Device-specific Kexts ###
+### ##################### ###
+
+
+## ######## ##
+## Wireless ##
+## ######## ##
+
+#
+# Intel ethernet
+#
+acidanthera/IntelMausi                    IntelMausi-{VERSION}-{VARIANT}
+
+#
+# Intel Wi-Fi
+#
+OpenIntelWireless/itlwm                   itlwm_{VERSION}_stable.kext
+#
+# or use AirportItlwm (macOS version-dependent)
+#
+OpenIntelWireless/itlwm                   AirportItlwm_{VERSION}_stable_[your macOS version].kext
+
+#
+# Intel bluetooth
+#
+OpenIntelWireless/IntelBluetoothFirmware  IntelBluetooth-{VERSION} (IntelBluetoothFirmware, IntelBTPatcher)
+
+#
+# I211 NICs (Monterey+)
+#
+donatengit/AppleIGB                       AppleIGB.{VARIANT}.kext
+
+#
+# I211 NICs (Big Sur & below)
+#
+khronokernel/SmallTree-I211-AT-patch      SmallTreeIntel82576.kext
+
+#
+# Atheros/Killer NICs
+#
+Mieze/AtherosE2200Ethernet                AtherosE2200Ethernet-{VERSION}.zip
+
+#
+# Realtek Gigabit ethernet
+#
+Mieze/RTL8111_driver_for_OS_X             RealtekRTL8111-{VERSION}.zip
+
+#
+# Realtek 2.5GB Ethernet
+#
+Mieze/LucyRTL8125Ethernet                 LucyRTL8125Ethernet-{VERSION}.zip
